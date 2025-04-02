@@ -39,6 +39,18 @@
           "data": {
             "pathName": "LStep 4"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LStep 5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score"
+          }
         }
       ]
     }
