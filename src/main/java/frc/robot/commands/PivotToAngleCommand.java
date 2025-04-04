@@ -1,51 +1,36 @@
 package frc.robot.commands;
 
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.PivotSubsystem;
 
 public class PivotToAngleCommand extends Command {
+    private final PivotSubsystem pivotSubsystem;
+    private final double targetRotations;
+    private final double tolerance = 0.5; // Adjust as needed
 
-    private final SparkMax pivotMotor;
-    private final RelativeEncoder encoder;
-    private final double targetAngle;
+    public PivotToAngleCommand(PivotSubsystem pivotSubsystem, double targetRotations) {
+        this.pivotSubsystem = pivotSubsystem;
+        this.targetRotations = targetRotations;
+        addRequirements(pivotSubsystem);
 
-    public PivotToAngleCommand(SparkMax pivotMotor, double targetAngle) {
-        this.pivotMotor = pivotMotor;
-        this.encoder = pivotMotor.getEncoder();
-        this.targetAngle = targetAngle;
-
-        addRequirements(); // Add subsystem if applicable
+    
     }
 
     @Override
     public void initialize() {
-        double gearRatio = 15.0;
-        double motorRotations = (targetAngle / 360.0) * gearRatio;
-        System.out.println("Target Angle: " + targetAngle + " degrees | Target Rotations: " + motorRotations);
-    }
-
-    @Override
-    public void execute() {
-        double gearRatio = 15.0;
-        double motorRotations = (targetAngle / 360.0) * gearRatio;
-        double currentPosition = encoder.getPosition();
-
-        double power = (motorRotations - currentPosition) * 5; // P-controller
-        pivotMotor.set(Math.max(-0.5, Math.min(0.5, power))); // Clamp power
+        pivotSubsystem.setPivotPosition(targetRotations);
     }
 
     @Override
     public boolean isFinished() {
-        double gearRatio = 15.0;
-        double motorRotations = (targetAngle / 360.0) * gearRatio;
-        return Math.abs(encoder.getPosition() - motorRotations) < 0.05;
+        return Math.abs(pivotSubsystem.getEncoderPosition() - targetRotations) <= tolerance;
     }
 
     @Override
     public void end(boolean interrupted) {
-        pivotMotor.set(0);
-        System.out.println("Pivot movement complete.");
+        if (interrupted) {
+            pivotSubsystem.setPivotPosition(pivotSubsystem.getEncoderPosition()); // Stop at current position
+        }
     }
 }

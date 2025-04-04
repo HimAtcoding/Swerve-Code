@@ -6,9 +6,12 @@ package frc.robot;
 
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.ScoringPosition;
+import frc.robot.commands.AlignToReef;
 import frc.robot.commands.DriveToPose;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.PivotSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -22,6 +25,8 @@ import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -35,6 +40,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.commands.MoveElevatorToPosition;
+import frc.robot.commands.MoveIntake;
 import frc.robot.commands.MoveToPoseCommand;
 import frc.robot.commands.PivotToAngleCommand;
 
@@ -52,8 +58,12 @@ public class RobotContainer {
 // private final PivotSubsystem pivotSubsystem = new PivotSubsystem();
 
   private final ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem(14);
+  private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private final PivotSubsystem pivotSubsystem = new PivotSubsystem(11);
 
   private final LimelightSubsystem limelight = new LimelightSubsystem();
+
+  // SparkMax pivotMotor = new SparkMax(11, MotorType.kBrushless);
 
   private boolean isFlipped = false;
 
@@ -72,9 +82,19 @@ private final CommandXboxController m_operatorController =
       "Score",
       Commands.sequence(
         new MoveElevatorToPosition(elevatorSubsystem, 200),
+        // new PivotToAngleCommand(pivotMotor, 180),
+        // new MoveIntake(intakeSubsystem, -100),
+        // new MoveIntake(intakeSubsystem, 0),
+        // new PivotToAngleCommand(pivotMotor, 0),
         new MoveElevatorToPosition(elevatorSubsystem, 0)
       )
     );
+
+    NamedCommands.registerCommand("Intake Coral", Commands.sequence(
+      Commands.waitSeconds(3.0)
+      // new MoveIntake(intakeSubsystem, 100),
+      // new MoveIntake(intakeSubsystem, 0)
+    ));
     
     configureBindings();
     drivebase.setDefaultCommand(!RobotBase.isSimulation() ? driveFieldOrientedAngularVelocity : driveFieldOrientedDirectAngleKeyboard);
@@ -166,19 +186,31 @@ private final CommandXboxController m_operatorController =
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
     
-    new JoystickButton(m_driverController.getHID(), 1).onTrue(
-        new MoveToPoseCommand(drivebase)
+    m_driverController.povLeft().onTrue(
+        new AlignToReef(drivebase, ScoringPosition.LEFT)
     );
 
-    
+    m_driverController.povRight().onTrue(
+      new AlignToReef(drivebase, ScoringPosition.RIGHT)
+    );
 
     new JoystickButton(m_operatorController.getHID(), 1)
             .onTrue(new MoveElevatorToPosition(elevatorSubsystem, 0));
 
         // Example: Move to 0 (home) when Button 2 is pressed
-        new JoystickButton(m_operatorController.getHID(), 2)
+        new JoystickButton(m_operatorController.getHID(), 3)
             .onTrue(new MoveElevatorToPosition(elevatorSubsystem, 150));
 
+        new JoystickButton(m_operatorController.getHID(), 2)
+            .onTrue(new MoveElevatorToPosition(elevatorSubsystem, 300));
+        
+        // new JoystickButton(m_operatorController.getHID(), 5).onTrue(new MoveIntake(intakeSubsystem, 100));
+        // new JoystickButton(m_operatorController.getHID(), 6).onTrue(new MoveIntake(intakeSubsystem, -100));
+        new Trigger(() -> m_operatorController.getLeftTriggerAxis() > 0.2).onTrue(new PivotToAngleCommand(pivotSubsystem, -5));
+
+        new Trigger(() -> m_operatorController.getRightTriggerAxis() > 0.2).onTrue(new PivotToAngleCommand(pivotSubsystem, 0));
+        
+        
         // new JoystickButton(m_operatorController.getHID(), 5)
         //     .onTrue(new PivotToAngleCommand(pivotSubsystem.getPivotMotor(), 0));
 

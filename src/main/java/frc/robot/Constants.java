@@ -5,7 +5,9 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,11 +19,15 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -41,6 +47,24 @@ public final class Constants {
 
   //"absoluteEncoderOffset": 0.81298828125, 
   
+
+  // For Alignment PID
+  public static final AngularVelocity kMaxAngularRate = RotationsPerSecond.of(5);
+  public static final TrapezoidProfile.Constraints kVelocityConstraints = new TrapezoidProfile.Constraints(
+      maxSpeed, 3);
+
+  public static final TrapezoidProfile.Constraints kThetaConstraints = new TrapezoidProfile.Constraints(
+      kMaxAngularRate.in(RotationsPerSecond), 3);
+  public static final ProfiledPIDController kPoseVelocityXController = new ProfiledPIDController(5.5, 0, 0,
+      kVelocityConstraints);
+  public static final ProfiledPIDController kPoseVelocityYController = new ProfiledPIDController(5.5, 0, 0,
+      kVelocityConstraints);
+  public static final ProfiledPIDController kPoseThetaController = new ProfiledPIDController(10, 0, 0,
+      kThetaConstraints);
+      
+  public static final Translation2d leftReefOffset = new Translation2d(0.422, -0.1651); // robot bumper offset to be flush and then the left
+    public static final Translation2d rightReefOffset = new Translation2d(0.422, 0.1651);// robot bumper offset to be flush and then the right
+
   // Elevator PID Constants (TUNE THESE)
   public static final double ELEVATOR_kP = 0.1;
   public static final double ELEVATOR_kI = 0.0;
@@ -49,7 +73,8 @@ public final class Constants {
   // Elevator Setpoints
   public static final double ELEVATOR_LOW = 0.0;  // Lowest position
   public static final double ELEVATOR_HIGH = 100.0;  // Highest position
-  public static final Matrix<N3, N1> kVisionStdDevs = VecBuilder.fill(3, 3, Degrees.of(7).in(Radians));
+  public static final Matrix<N3, N1> kVisionStdDevs = VecBuilder.fill(.5, .5, 9999999);
+
   public static int[] reefIds = { 6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22 };
   public static Map<Integer, Pose2d> getReefPoseMap() {
     AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);  
@@ -65,4 +90,9 @@ public final class Constants {
     return poseMap;
   }
   public static Map<Integer, Pose2d> reefPoseMap = getReefPoseMap();
+
+  public enum ScoringPosition {
+      LEFT,
+      RIGHT
+    }
 }

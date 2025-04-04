@@ -51,8 +51,8 @@ public class Robot extends TimedRobot {
   // private static final SparkMax RightCoralIntake = new SparkMax(15, MotorType.kBrushless);
   // private static final SparkMax LeftCoralIntake = new SparkMax(13, MotorType.kBrushless);
 
-  private static final SparkMax PivotMax = new SparkMax(11, MotorType.kBrushless);
-  private static RelativeEncoder RELATIVE_ENCODER = PivotMax.getEncoder();
+  // private static final SparkMax PivotMax = new SparkMax(11, MotorType.kBrushless);
+  // private static RelativeEncoder RELATIVE_ENCODER = PivotMax.getEncoder();
   // private double targetPosition = RELATIVE_ENCODER.getPosition(); 
 
   // private static final SparkMax Coral_Intake = new SparkMax(10,MotorType.kBrushless);
@@ -207,17 +207,17 @@ var turnConfig = new SparkMaxConfig();
     double pivot_speed = (PIVOT_RIGHT - PIVOT_LEFT)/10.0;
 
 
-    if (pivot_speed == 0) {
-      double currentPosition = RELATIVE_ENCODER.getPosition();
-      double error = targetPosition - currentPosition;
-      PivotMax.set(error*.05);
-    } else {
-      PivotMax.set(pivot_speed);
-    }
+    // if (pivot_speed == 0) {
+    //   double currentPosition = RELATIVE_ENCODER.getPosition();
+    //   double error = targetPosition - currentPosition;
+    //   PivotMax.set(error*.05);
+    // } else {
+    //   PivotMax.set(pivot_speed);
+    // }
 
-    if (XBOX_CONTROLLER.getRightBumperButtonReleased() || XBOX_CONTROLLER.getLeftBumperButtonReleased()) {
-      targetPosition = RELATIVE_ENCODER.getPosition();
-    }
+    // if (XBOX_CONTROLLER.getRightBumperButtonReleased() || XBOX_CONTROLLER.getLeftBumperButtonReleased()) {
+    //   targetPosition = RELATIVE_ENCODER.getPosition();
+    // }
 
     /*if (XBOX_CONTROLLER.getRightBumperButton() ) {
       double currentPosition = RELATIVE_ENCODER.getPosition();

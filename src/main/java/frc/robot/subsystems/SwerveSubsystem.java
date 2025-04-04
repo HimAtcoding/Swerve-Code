@@ -99,8 +99,17 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    LimelightResults visionResult = LimelightHelpers.getLatestResults("");
-    swerveDrive.addVisionMeasurement(visionResult.getBotPose2d(), visionResult.timestamp_LIMELIGHT_publish, Constants.kVisionStdDevs);
+
+    // swerveDrive.setVisionMeasurementStdDevs(Constants.kVisionStdDevs);
+    if (LimelightHelpers.getTV("")) {
+      LimelightHelpers.SetRobotOrientation("", swerveDrive.getYaw().getDegrees(), 0.0 , 0.0, 0.0, 0.0, 0.0);
+
+      LimelightHelpers.PoseEstimate visionResult = LimelightHelpers.getBotPoseEstimate_wpiBlue("");
+      swerveDrive.addVisionMeasurement(visionResult.pose, visionResult.timestampSeconds);
+    } else {
+      swerveDrive.updateOdometry();
+    }
+
     // This method will be called once per scheduler run
   }
 
@@ -161,9 +170,9 @@ public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic drive trains
-              new PIDConstants(5.0, 0.0, 0.0),
+              new PIDConstants(.1, 0.0, 0.0),
               // Translation PID constants
-              new PIDConstants(5.0, 0.0, 0.0)
+              new PIDConstants(.1, 0.0, 0.0)
               // Rotation PID constants
           ),
           config,
